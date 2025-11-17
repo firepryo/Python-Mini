@@ -1,0 +1,50 @@
+digraph Student_Grouping_Workflow {
+	rankdir=TB size=12
+	Start [label="Start Program" color=lightgrey shape=ellipse style=filled]
+	LoadCSV [label="Load records.csv" shape=box]
+	ExtractCGPA [label="Extract CGPA values" shape=box]
+	SortCGPA [label="Sort CGPA list" shape=box]
+	ComputeThresholds [label="Compute 33rd & 67th Percentiles
+Assign thresholds" shape=box]
+	AssignLabels [label="Assign HI / MID / LO labels based on thresholds" shape=box]
+	GroupByTutorial [label="Group students by Tutorial Group" shape=box]
+	OptionalShuffle [label="Optional: Shuffle students within groups" shape=box]
+	InitTeams [label="Initialize empty teams per tutorial group" shape=box]
+	PlaceStudents [label="For each student:
+Find best team by diversity score" shape=box]
+	CheckCapacity [label="Is team capacity reached?" shape=diamond]
+	SimulateAddition [label="Simulate adding student to each team" shape=box]
+	CheckDiversity [label="Compute diversity score if student added" shape=box]
+	SelectBestTeam [label="Select team with highest diversity score" shape=box]
+	FallbackTeam [label="If no best team, select smallest team with space" shape=box]
+	UpdateStats [label="Update team statistics
+School, Gender, CGPA" shape=box]
+	LeftoversCheck [label="Are there leftover students?" shape=diamond]
+	AssignLeftovers [label="Assign leftovers to teams maximizing diversity" shape=box]
+	WriteCSV [label="Write groupings.csv with team assignments" shape=box]
+	Visualize [label="Visualize diversity, CGPA, gender distributions" shape=box]
+	End [label="End Program" color=lightgrey shape=ellipse style=filled]
+	Start -> LoadCSV
+	LoadCSV -> ExtractCGPA
+	ExtractCGPA -> SortCGPA
+	SortCGPA -> ComputeThresholds
+	ComputeThresholds -> AssignLabels
+	AssignLabels -> GroupByTutorial
+	GroupByTutorial -> OptionalShuffle
+	OptionalShuffle -> InitTeams
+	InitTeams -> PlaceStudents
+	PlaceStudents -> CheckCapacity
+	CheckCapacity -> SimulateAddition [label=No]
+	CheckCapacity -> FallbackTeam [label=Yes]
+	SimulateAddition -> CheckDiversity
+	CheckDiversity -> SelectBestTeam
+	SelectBestTeam -> UpdateStats
+	FallbackTeam -> UpdateStats
+	UpdateStats -> PlaceStudents [label="Next Student"]
+	PlaceStudents -> LeftoversCheck [label="All Students Placed"]
+	LeftoversCheck -> AssignLeftovers [label=Yes]
+	LeftoversCheck -> WriteCSV [label=No]
+	AssignLeftovers -> WriteCSV
+	WriteCSV -> Visualize
+	Visualize -> End
+}
